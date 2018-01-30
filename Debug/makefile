@@ -8,6 +8,10 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/utils/inducers/subdir.mk
+-include src/utils/subdir.mk
+-include src/graph/family/subdir.mk
+-include src/graph/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk
@@ -38,19 +42,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: GraphExaminer.exe
+all: GraphExaminer
 
 # Tool invocations
-GraphExaminer.exe: $(OBJS) $(USER_OBJS)
+GraphExaminer: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: Cygwin C++ Linker'
-	g++ -L"D:\Dev\cygwin64\bin" -L"D:\Dev\cygwin64\usr\local\lib" -o "GraphExaminer.exe" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: GCC C++ Linker'
+	g++ -L/usr/include -o "GraphExaminer" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(CPP_DEPS)$(C_DEPS) GraphExaminer.exe
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) GraphExaminer
 	-@echo ' '
 
 .PHONY: all clean dependents
