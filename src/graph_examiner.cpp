@@ -14,7 +14,8 @@ template<typename Graph>
 void print_graph(const Graph& g) {
 	for (typename Graph::edge_iterator ei = edges(g).first;
 			ei != edges(g).second; ei++) {
-		std::cout << "(" << source(*ei, g) << "-" << target(*ei, g) << ")";
+		//std::cout << "(" << source(*ei, g) << "-" << target(*ei, g) << ")";
+		std::cout <<  source(*ei, g) << "--" << target(*ei, g) << " ";
 	}
 	std::cout << endl;
 }
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
 	while (!q.empty()) {
 		curr = q.front();
 		q.pop();
-		if (boost::num_vertices(curr) + 1 <= 10) {
+		if (boost::num_vertices(curr) + 1 <= 9) {
 			//if less than n vertices
 			// std::cout << "Adding vertex to: ";
 			graphs = gen.addVertex(curr);

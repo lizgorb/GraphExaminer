@@ -30,25 +30,30 @@ class InducedCheck {
 
   public:
 	InducedCheck (){
-		_CheckInducedCalls = 0;
-		_CheckInducedSeconds = 0;
+		check_induced_calls_ = 0;
+		check_induced_seconds_ = 0;
 	};
 	bool CheckInduced (const Graph& g);
 	void AddInducedGraph(const Subgraph<Graph>& g);
 	void benchmark() {
-	    	std::cout << "CheckInduced was called " << _CheckInducedCalls << " times and took " << _CheckInducedSeconds
-	    			 << "(" << _CheckInducedSeconds/_CheckInducedCalls << " on avg)" << endl;
+	    	std::cout << "CheckInduced was called " << check_induced_calls_ << " times and took " << check_induced_seconds_
+	    			 << "(" << check_induced_seconds_/check_induced_calls_ << " on avg)" << endl;
+
+	    	for (auto& t : subgraph_induced_seconds_)
+	    	    std::cout << "	" << t.first << ": " << t.second << endl;
 	    };
   private:
-	int _CheckInducedCalls;
-	float _CheckInducedSeconds;
+	int check_induced_calls_;
+	float check_induced_seconds_;
+	map<string, float> subgraph_induced_seconds_;
 };
 
 
 template <typename Graph>
 bool InducedCheck<Graph>::CheckInduced (const Graph& g){
-	_CheckInducedCalls++;
+	check_induced_calls_++;
 	clock_t t;
+	clock_t t_subgraph;
 	t = clock();
 
 	bool induced = false;
@@ -57,10 +62,13 @@ bool InducedCheck<Graph>::CheckInduced (const Graph& g){
 		if (induced){
 			break;
 		}
+		t_subgraph = clock();
 		induced = candidate_g.IsInduced(g);
+		subgraph_induced_seconds_[candidate_g.name] += ((float)(clock() - t_subgraph))/CLOCKS_PER_SEC;
+
 	}
 
-	_CheckInducedSeconds  += ((float)(clock() - t))/CLOCKS_PER_SEC;
+	check_induced_seconds_  += ((float)(clock() - t))/CLOCKS_PER_SEC;
 	return induced;
 }
 
@@ -68,4 +76,5 @@ bool InducedCheck<Graph>::CheckInduced (const Graph& g){
 template <typename Graph>
 void InducedCheck<Graph>::AddInducedGraph (const Subgraph<Graph>& g){
 	checkGraphs.push_back(g);
+	subgraph_induced_seconds_.insert( std::pair<string,int>(g.name, 0));
 }
