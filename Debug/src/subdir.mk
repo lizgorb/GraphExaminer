@@ -4,31 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/Colorer.cpp \
-../src/CompleteClass.cpp \
-../src/EvenHoleFree.cpp \
-../src/GraphClass.cpp \
-../src/GraphGenerator.cpp \
-../src/HoleDetector.cpp \
-../src/InducedCheck.cpp 
+../src/graph_examiner.cpp \
+../src/graph_generator.cpp \
+../src/induced_check.cpp 
 
 OBJS += \
-./src/Colorer.o \
-./src/CompleteClass.o \
-./src/EvenHoleFree.o \
-./src/GraphClass.o \
-./src/GraphGenerator.o \
-./src/HoleDetector.o \
-./src/InducedCheck.o 
+./src/graph_examiner.o \
+./src/graph_generator.o \
+./src/induced_check.o 
 
 CPP_DEPS += \
-./src/Colorer.d \
-./src/CompleteClass.d \
-./src/EvenHoleFree.d \
-./src/GraphClass.d \
-./src/GraphGenerator.d \
-./src/HoleDetector.d \
-./src/InducedCheck.d 
+./src/graph_examiner.d \
+./src/graph_generator.d \
+./src/induced_check.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
