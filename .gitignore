@@ -1,5 +1,7 @@
 Debug/
+Debug/*
 .cproject
 *.project
 .settings/
 *.exe
+Debug/GraphExaminer.exe
