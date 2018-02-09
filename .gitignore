@@ -1,2 +1,5 @@
 Debug/
-Debug/makefile
+.cproject
+*.project
+.settings/
+*.exe
