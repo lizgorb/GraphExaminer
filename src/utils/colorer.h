@@ -29,7 +29,8 @@ public:
 		_ThreeColorCalls = 0;
 		_ThreeColorSeconds = 0;
 	};
-	bool ThreeColor(const Graph& g,  map<int, int> color_map);
+    bool ThreeColor(const Graph& g,  map<int, int> color_map);
+	bool ThreeColor(const Graph& g,  map<int, int> color_map, string token);
 	 void benchmark() {
 		std::cout << "ThreeColor was called " << _ThreeColorCalls << " times and took " << _ThreeColorSeconds
 				 << "(" << _ThreeColorSeconds/_ThreeColorCalls << " on avg)" << endl;

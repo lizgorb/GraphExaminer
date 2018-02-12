@@ -28,14 +28,25 @@ int main(int argc, char **argv) {
 	typedef graph_traits<Graph>::vertices_size_type vertices_size_type;
 	typedef property_map<Graph, vertex_index_t>::const_type vertex_index_map;
 
-	E edges[] = { E(0, 1) };
-	Graph vector_graph(&edges[0], &edges[0] + sizeof(edges) / sizeof(E), 2);
-
 	GraphGenerator<Graph> gen;
 	InducedCheck<Graph> checker;
 	HoleDetector<Graph> hd;
 	Colorer<Graph> colorer;
 	map<int, int> color_map;
+
+	 /*E test_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,6),E(0,7),
+				 E(2,7),E(3,7),E(5,7),E(1,8),E(4,8), E(5,8), E(6,8) };
+	 Graph test (&test_edges[0], &test_edges[0] + sizeof(test_edges) / sizeof(E), 9);
+	 vector<vertices_size_type> color_vec(num_vertices(test));
+	iterator_property_map<vertices_size_type*, vertex_index_map> color(
+			&color_vec.front(), get(vertex_index, test));
+	vertices_size_type num_colors = sequential_vertex_coloring(test, color);
+	 cout << "test - sequential 3 colorable?" << num_colors << endl;
+	 cout << "test - 3 colorable? " << std::boolalpha << colorer.ThreeColor(test,color_map) << endl;
+	 cout << "has induced? " << std::boolalpha << checker.CheckInduced(test) << endl;*/
+
+	E edges[] = { E(0, 1) };
+	Graph vector_graph(&edges[0], &edges[0] + sizeof(edges) / sizeof(E), 2);
 
 	Subgraph<Graph> k4 = SubgraphFactory<Graph>::Create("k4");
 	checker.AddInducedGraph(k4);
@@ -44,10 +55,12 @@ int main(int argc, char **argv) {
 	Subgraph<Graph> w6 = SubgraphFactory<Graph>::Create("w6");
 	checker.AddInducedGraph(w6);
 
-	/*E test_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,5),E(3,5),E(2,6),E(4,6),E(3,7),E(4,7),E(6,7) };
-	 Graph test (&test_edges[0], &test_edges[0] + sizeof(test_edges) / sizeof(E), 6);
-	 cout << "3 colorable? " << std::boolalpha << colorer.ThreeColor(test,color_map) << endl;
-	 cout << "has induced? " << std::boolalpha << checker.CheckInduced(test) << endl;*/
+	 E crit1_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,5),E(3,5),
+			 E(2,6),E(4,6),E(3,7),E(4,7),E(6,7) };
+	 Graph crit1 (&crit1_edges[0], &crit1_edges[0] + sizeof(crit1_edges) / sizeof(E), 8);
+	 BasicInducer<Graph> *inducer = new BasicInducer<Graph>();
+	 Subgraph<Graph> sg(crit1, inducer, "crit1");
+	 checker.AddInducedGraph(sg);
 
 	//generate graphs
 	Graph curr;
@@ -59,7 +72,7 @@ int main(int argc, char **argv) {
 	while (!q.empty()) {
 		curr = q.front();
 		q.pop();
-		if (boost::num_vertices(curr) + 1 <= 9) {
+		if (boost::num_vertices(curr) + 1 <= 10) {
 			graphs = gen.AddVertex(curr);
 
 			//todo: Parallelize
@@ -80,8 +93,7 @@ int main(int argc, char **argv) {
 						// really check 3 coloring
 						if (!colorable) {
 							count++;
-							cout << "3 colorable? " << std::boolalpha
-									<< colorable << " : ";
+							cout << "Is 3 colorable? " << std::boolalpha << colorable << " : ";
 							print_graph(g);
 						}
 					}
@@ -99,5 +111,6 @@ int main(int argc, char **argv) {
 	std::cout << "Took " << ((float) (clock() - t)) / CLOCKS_PER_SEC
 			<< " seconds" << endl;
 
+	/**/
 	return 0;
 }

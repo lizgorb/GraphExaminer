@@ -7,9 +7,15 @@
 
 #include "colorer.h"
 
-
 template <typename Graph>
 bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
+	return ThreeColor(g, color_map, "-");
+}
+
+
+template <typename Graph>
+bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map, string token){
+	bool debug = false;
 	_ThreeColorCalls++;
 	clock_t t;
 	t = clock();
@@ -17,17 +23,19 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
 	int nV = num_vertices(g);
 	IndexMap indices = get(vertex_index, g);
 
-	/*std::cout << "Checking 3-colorability of:";
+	if (debug){
+	std::cout << token << ": " << "Checking 3-colorability of:";
 	for (typename Graph::edge_iterator ei = edges(g).first; ei != edges(g).second; ei++) {
 		  std::cout << "(" << source(*ei, g) << "-" << target(*ei,g) <<  ")";
 	}
 	std::cout << endl;
 
+	std::cout << token << ": ";
 	for( const auto& c_pair : color_map )
 	{
 		std::cout << c_pair.first << ":" << c_pair.second << ", ";
 	}
-	std::cout << endl;*/
+	std::cout << endl;}
 
 
 	bool valid_coloring = false;
@@ -52,20 +60,23 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
 			}
 		}
 
-		//std::cout << "Found non-adjacent " << x << " and " << y << endl;
+		if(debug){
+		  std::cout << token << ": " << "Found non-adjacent " << x << " and " << y << endl;
+		}
 
 		Graph temp;
 		vector<int> x_colors = possibleColors(g, x, color_map);
 		vector<int> y_colors =  possibleColors(g, y, color_map);
 
-		/*std::cout << " possible colors for " << x << ": ";
+		if(debug){
+		std::cout << " possible colors for " << x << ": ";
 		for (auto i: x_colors)
 		  std::cout << i << ' ';
 		std::cout << endl;
 		std::cout << " possible colors for " << y << ": ";
 				for (auto i: y_colors)
 				  std::cout << i << ' ';
-	    std::cout << endl; */
+	    std::cout << endl; }
 
 	    // if can't color one of the vertices (or both) - not valid
 	    if ( !(x_colors.size() > 0 && y_colors.size() > 0 ))
@@ -85,7 +96,9 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
 		 	 copy_graph(g, temp);
 		 	 color_map.insert ( std::pair<int,int>(x, color) );
 
-		 	//  std::cout << "Colored " << x << " and " << y << " with " << color << endl;
+		 	 if(debug){
+		 		 std::cout << token << ": " << "Colored " << x << " and " << y << " with " << color << endl;
+		 	 }
 
 		 	// copy all edges of y to x
 		 	for (int i = 0; i< nV; i++){
@@ -103,13 +116,19 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
 
 		 	remove_vertex(y, temp);
 
-		 	/*std::cout << "removed vertex " << y << " new graph is: ";
+		 	if(debug)
+		 	{
+		 	std::cout << token << ": " << "removed vertex " << y << " new graph is: ";
 		 	for (typename Graph::edge_iterator ei = edges(temp).first; ei != edges(temp).second; ei++) {
 				  std::cout << "(" << source(*ei, temp) << "-" << target(*ei,temp) <<  ")";
 				}
-			 std::cout << endl;*/
+			 std::cout << endl;
+		 	}
 
 		 	// update map
+		 	map<int, int> temp_color_map;
+		 	temp_color_map.insert(color_map.begin(), color_map.end());
+
 		 	for(int i=y+1; i < nV; i++)
 		 	{
 		 		if( color_map.find(i) != color_map.end()){
@@ -127,8 +146,13 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
 				color_map.erase(nV-1);
 			}
 
-		 	valid_coloring = valid_coloring || ThreeColor(temp, color_map);
-		 	// std::cout<< "A - valid coloring? " << std::boolalpha << valid_coloring << endl;
+		 	valid_coloring = valid_coloring || ThreeColor(temp, color_map, token + "-S(" +  std::to_string(x) +","+ std::to_string(y) + ")");
+		 	if(debug){
+		 		std::cout<< token << ": " << "Valid coloring? " << std::boolalpha << valid_coloring << endl;
+		 	}
+
+		 	// resote color map
+		 	color_map = temp_color_map;
 		 }
 
 
@@ -141,8 +165,10 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
 				for (std::vector<int>::iterator yi = y_colors.begin() ; yi != y_colors.end() && !valid_coloring; ++yi){
 					y_color = *yi;
 					if(y_color != x_color){
-					  // std::cout<< "Coloring " << x << " with " << x_color << " and "<< y <<" with " << y_color << endl;
-
+						if(debug)
+						{
+							std::cout<<  token << ": " << "Coloring " << x << " with " << x_color << " and "<< y <<" with " << y_color << endl;
+						}
 					   // update map
 					   if( color_map.find(x) != color_map.end())
 						   color_map[x] = x_color;
@@ -160,8 +186,11 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
 
 					   // add an edge between x and y
 					   boost::add_edge(get(indices, x),get(indices, y),temp);
-					   valid_coloring = valid_coloring || ThreeColor(temp, color_map);
-					   // std::cout<< "B - valid coloring? " << std::boolalpha << valid_coloring << endl;
+					   valid_coloring = valid_coloring || ThreeColor(temp, color_map, token + "-D("+ std::to_string(x)+","+ std::to_string(y)+")");
+					   if(debug)
+					   {
+					    std::cout<< token << ": " << "Valid coloring? " << std::boolalpha << valid_coloring << endl;
+					   }
 					}
 				}
 			}
