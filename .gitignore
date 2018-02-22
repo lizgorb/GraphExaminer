@@ -5,3 +5,4 @@ Debug/*
 .settings/
 *.exe
 Debug/GraphExaminer.exe
+.settings/language.settings.xml
