@@ -9,16 +9,18 @@
 
 template <typename Graph>
 bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map){
-	return ThreeColor(g, color_map, "-");
+	_ThreeColorCalls++;
+	clock_t t;
+	t = clock();
+	bool valid_coloring =  ThreeColor(g, color_map, "-");
+	_ThreeColorSeconds += ((float)(clock() - t))/CLOCKS_PER_SEC;
+	return valid_coloring;
 }
 
 
 template <typename Graph>
 bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map, string token){
 	bool debug = false;
-	_ThreeColorCalls++;
-	clock_t t;
-	t = clock();
 
 	int nV = num_vertices(g);
 	IndexMap indices = get(vertex_index, g);
@@ -151,7 +153,7 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map, string 
 		 		std::cout<< token << ": " << "Valid coloring? " << std::boolalpha << valid_coloring << endl;
 		 	}
 
-		 	// resote color map
+		 	// restore color map
 		 	color_map = temp_color_map;
 		 }
 
@@ -196,8 +198,6 @@ bool Colorer<Graph>::ThreeColor(const Graph& g, map<int, int> color_map, string 
 			}
 		 }
 	}
-
-	_ThreeColorSeconds += ((float)(clock() - t))/CLOCKS_PER_SEC;
 
 	return valid_coloring;
 }

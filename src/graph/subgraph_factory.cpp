@@ -12,7 +12,7 @@
 #include "family/wheel_family.cpp"
 #include "../utils/inducers/basic_inducer.h"
 #include "../utils/inducers/dominating_vertex_inducer.cpp"
-#include "../utils/inducers/clique_inducer.cpp"
+#include "../utils/inducers/clique_inducer.h"
 
 #include <iostream>
 #include <regex>
@@ -38,7 +38,7 @@ Subgraph<Graph> SubgraphFactory<Graph>::Create(string name){
 	{
 		int n = stoi(name.substr(1), &sz);
 		g = CompleteFamily<Graph>::Create(n);
-		inducer = new CliqueInducer<Graph>(n);
+		//inducer = new CliqueInducer<Graph>(n);
 	}
 	else if(regex_match (name, reg_wheel))
 	{
@@ -53,4 +53,3 @@ Subgraph<Graph> SubgraphFactory<Graph>::Create(string name){
 	Subgraph<Graph> sg(g, inducer, name);
 	return sg;
 }
-

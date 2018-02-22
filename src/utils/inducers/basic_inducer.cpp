@@ -18,19 +18,23 @@ template <typename Graph>
 bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 	bool induced = false;
 	int g_v = boost::num_vertices(g);
-	int array[g_v];
-	for( int i = 0; i < g_v; i++ ) {  array[i] = i; }
-
-	IndexMap mapIndex;
-	boost::associative_property_map<IndexMap> propmapIndex(mapIndex);
-
 	int candidate_v = boost::num_vertices(subgraph);
-	vector< vector<int> > subsets = SubsetsOfSize(g_v,candidate_v);
-
-	for (int i = 0; i < subsets.size() && !induced; i++)
+	if(candidate_v <= g_v && boost::num_edges(subgraph) <= boost::num_edges(g))
 	{
-		vector<int> subset = subsets[i];
-		induced  = IsSubsetInduced(g, subgraph, subset);
+		int array[g_v];
+		for( int i = 0; i < g_v; i++ ) {  array[i] = i; }
+
+		IndexMap mapIndex;
+		boost::associative_property_map<IndexMap> propmapIndex(mapIndex);
+
+
+		vector< vector<int> > subsets = SubsetsOfSize(g_v,candidate_v);
+
+		for (int i = 0; i < subsets.size() && !induced; i++)
+		{
+			vector<int> subset = subsets[i];
+			induced  = IsSubsetInduced(g, subgraph, subset);
+		}
 	}
 
 	return induced;

@@ -8,9 +8,7 @@
 #ifndef GRAPH_COMMON_GRAPHS_H_
 #define GRAPH_COMMON_GRAPHS_H_
 
-#include <utility>
 #include <string>
-#include <stdbool.h>
 #include <map>
 
 using namespace std;

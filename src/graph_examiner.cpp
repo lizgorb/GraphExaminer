@@ -1,38 +1,15 @@
-#include <iostream>
+#include "graph_examiner.h"
 #include <time.h>
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/sequential_vertex_coloring.hpp>
-#include "graph/subgraph_factory.cpp"
-#include "graph_generator.cpp"
-#include "induced_check.cpp"
-#include "utils/colorer.cpp"
-#include "utils/hole_detector.cpp"
-using namespace boost;
 
-template<typename Graph>
-void print_graph(const Graph& g) {
-	for (typename Graph::edge_iterator ei = edges(g).first;
-		ei != edges(g).second; ei++) {
-		std::cout <<  source(*ei, g) << "--" << target(*ei, g) << " ";
-	}
-	std::cout << endl;
-}
-
-int main(int argc, char **argv) {
+void GraphExaminer::Examine(int max_v) {
 	clock_t t;
 	t = clock();
 
-	typedef adjacency_list<vecS, vecS, undirectedS> Graph;
-	typedef std::pair<int, int> E;
-	typedef graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-	typedef graph_traits<Graph>::vertices_size_type vertices_size_type;
-	typedef property_map<Graph, vertex_index_t>::const_type vertex_index_map;
-
-	GraphGenerator<Graph> gen;
-	InducedCheck<Graph> checker;
-	HoleDetector<Graph> hd;
-	Colorer<Graph> colorer;
-	map<int, int> color_map;
+	// initialize queue with K2
+	E k2_edges[] = { E(0, 1) };
+	Graph k2(&k2_edges[0], &k2_edges[0] + sizeof(k2_edges) / sizeof(E), 2);
+	graphs_queue_.push(k2);
 
 	 /*E test_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,6),E(0,7),
 				 E(2,7),E(3,7),E(5,7),E(1,8),E(4,8), E(5,8), E(6,8) };
@@ -44,9 +21,6 @@ int main(int argc, char **argv) {
 	 cout << "test - sequential 3 colorable?" << num_colors << endl;
 	 cout << "test - 3 colorable? " << std::boolalpha << colorer.ThreeColor(test,color_map) << endl;
 	 cout << "has induced? " << std::boolalpha << checker.CheckInduced(test) << endl;*/
-
-	E edges[] = { E(0, 1) };
-	Graph vector_graph(&edges[0], &edges[0] + sizeof(edges) / sizeof(E), 2);
 
 	Subgraph<Graph> k4 = SubgraphFactory<Graph>::Create("k4");
 	checker.AddInducedGraph(k4);
@@ -65,44 +39,17 @@ int main(int argc, char **argv) {
 	//generate graphs
 	Graph curr;
 	vector<Graph> graphs;
-	queue<Graph> q;
-	q.push(vector_graph);
 
-	int count = 0;
-	while (!q.empty()) {
-		curr = q.front();
-		q.pop();
-		if (boost::num_vertices(curr) + 1 <= 10) {
+	while (!graphs_queue_.empty()) {
+		curr = graphs_queue_.front();
+		graphs_queue_.pop();
+		if (boost::num_vertices(curr) + 1 <= max_v) {
 			graphs = gen.AddVertex(curr);
-
-			//todo: Parallelize
-			for (auto &g : graphs) {
-				if (!checker.CheckInduced(g) && !hd.CheckEvenHole(g)) {
-					q.push(g);
-
-					//  huristic - try 3 coloring
-					vector<vertices_size_type> color_vec(num_vertices(g));
-					iterator_property_map<vertices_size_type*, vertex_index_map> color(
-							&color_vec.front(), get(vertex_index, g));
-					vertices_size_type num_colors = sequential_vertex_coloring(
-							g, color);
-					if (num_colors > 3) {
-						color_map.clear();
-						bool colorable = colorer.ThreeColor(g, color_map);
-
-						// really check 3 coloring
-						if (!colorable) {
-							count++;
-							cout << "Is 3 colorable? " << std::boolalpha << colorable << " : ";
-							print_graph(g);
-						}
-					}
-				}
-			}
+			CheckGraphs(graphs);
 		}
 	}
 
-	std::cout << "Found " << count << " non 3 colorable graphs" << endl;
+	std::cout << "Found " << graph_count_ << " non 3 colorable graphs" << endl;
 	gen.benchmark();
 	checker.benchmark();
 	hd.benchmark();
@@ -112,5 +59,43 @@ int main(int argc, char **argv) {
 			<< " seconds" << endl;
 
 	/**/
-	return 0;
+
 }
+
+void GraphExaminer::PrintGraph(const Graph& g) {
+	for (typename Graph::edge_iterator ei = edges(g).first;
+		ei != edges(g).second; ei++) {
+		std::cout <<  source(*ei, g) << "--" << target(*ei, g) << " ";
+	}
+	std::cout << endl;
+}
+
+void GraphExaminer::CheckGraphs(vector<Graph> graphs){
+	for (auto &g : graphs) {
+		CheckGraph(g);
+
+	}
+};
+void GraphExaminer::CheckGraph(const Graph& g){
+	if (!checker.CheckInduced(g) && !hd.CheckEvenHole(g)) {
+		graphs_queue_.push(g);
+
+		//  huristic - try 3 coloring
+		vector<vertices_size_type> color_vec(num_vertices(g));
+		iterator_property_map<vertices_size_type*, vertex_index_map> color(
+				&color_vec.front(), get(vertex_index, g));
+		vertices_size_type num_colors = sequential_vertex_coloring(
+				g, color);
+		if (num_colors > 3) {
+			color_map.clear();
+			bool colorable = colorer.ThreeColor(g, color_map);
+
+			// really check 3 coloring
+			if (!colorable) {
+				graph_count_++;
+				cout << "Is 3 colorable? " << std::boolalpha << colorable << " : ";
+				PrintGraph(g);
+			}
+		}
+	}
+};
