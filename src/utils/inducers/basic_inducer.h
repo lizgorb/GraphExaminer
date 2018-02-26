@@ -21,9 +21,9 @@ typedef map<vertex_t, size_t> IndexMap;
 public:
 	virtual bool IsInduced(const Graph& g, const Graph& subgraph);
 private:
-	bool IsIsomorphic(const Graph& g, const Graph& subgraph);
 	vector< vector<int> > SubsetsOfSize(int n,  int k);
 protected:
+	bool IsIsomorphic(const Graph& g, const Graph& subgraph);
 	bool IsSubsetInduced(const Graph& g, const Graph& subgraph, vector<int> subset);
 	vector< vector<int> > SubsetsOfSize(vector<int> set,  int k);
 };

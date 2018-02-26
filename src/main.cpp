@@ -9,7 +9,7 @@
 
 
 int main(int argc, char **argv){
-	int max_v = 8;
+	int max_v = 10;
 	if(argc>=2)
 	 {
 		max_v = std::stoi(argv[1]);

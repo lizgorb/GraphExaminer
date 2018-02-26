@@ -19,6 +19,12 @@ bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 	bool induced = false;
 	int g_v = boost::num_vertices(g);
 	int candidate_v = boost::num_vertices(subgraph);
+
+	// if the graphs have the same number of vertices - they should be isomorphic
+	if(g_v == candidate_v){
+		return IsIsomorphic(g, subgraph);
+	}
+
 	if(candidate_v <= g_v && boost::num_edges(subgraph) <= boost::num_edges(g))
 	{
 		int array[g_v];
@@ -27,12 +33,13 @@ bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 		IndexMap mapIndex;
 		boost::associative_property_map<IndexMap> propmapIndex(mapIndex);
 
-
-		vector< vector<int> > subsets = SubsetsOfSize(g_v,candidate_v);
-
+		// get all subsets without the last vertex
+		vector< vector<int> > subsets = SubsetsOfSize(g_v - 1,candidate_v - 1);
 		for (int i = 0; i < subsets.size() && !induced; i++)
 		{
 			vector<int> subset = subsets[i];
+			// add the last vertex
+			subset.push_back(g_v - 1);
 			induced  = IsSubsetInduced(g, subgraph, subset);
 		}
 	}
