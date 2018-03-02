@@ -34,48 +34,6 @@ void GraphExaminer::Examine(int max_v, vector<string> subgraphs) {
 	 cout << "test - 3 colorable? " << std::boolalpha << colorer.ThreeColor(test,color_map) << endl;
 	 cout << "has induced? " << std::boolalpha << checker.CheckInduced(test) << endl;*/
 
-
-
-/*
- 	// old problem
-	Subgraph<Graph> k4 = SubgraphFactory<Graph>::Create("k4");
-	checker.AddInducedGraph(k4);
-	Subgraph<Graph> w6 = SubgraphFactory<Graph>::Create("w6");
-	checker.AddInducedGraph(w6);
-	Subgraph<Graph> bowtie = SubgraphFactory<Graph>::Create("bowtie");
-	checker.AddInducedGraph(bowtie);
-	E crit1_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,5),E(3,5),
-			 E(2,6),E(4,6),E(3,7),E(4,7),E(6,7) };
-	 Graph crit1 (&crit1_edges[0], &crit1_edges[0] + sizeof(crit1_edges) / sizeof(E), 8);
-	 BasicInducer<Graph> *inducer = new BasicInducer<Graph>();
-	 Subgraph<Graph> crit1_sg(crit1, inducer, "crit1");
-	 checker.AddInducedGraph(crit1_sg); */
-/*
-	// path test
-	Subgraph<Graph> k4 = SubgraphFactory<Graph>::Create("k4");
-	checker.AddInducedGraph(k4);
-	Subgraph<Graph> p5 = SubgraphFactory<Graph>::Create("p5");
-	checker.AddInducedGraph(p5);
-	Subgraph<Graph> w6 = SubgraphFactory<Graph>::Create("w6");
-	checker.AddInducedGraph(w6);
-	BasicInducer<Graph> *inducer = new BasicInducer<Graph>();
-	E crit1_edges[] = { E(0,1),E(0,4),E(0,5),E(0,6),E(1,2),E(1,5),E(2,3),E(2,5),E(3,4), E(3,6),E(4,6) };;
-	Graph crit1 (&crit1_edges[0], &crit1_edges[0] + sizeof(crit1_edges) / sizeof(E), 7);
-	Subgraph<Graph> crit1_sg(crit1, inducer, "crit1");
-	checker.AddInducedGraph(crit1_sg);
-	E crit2_edges[] = { E(0,1),E(0,4),E(0,5),E(1,2),E(1,6),E(2,3),E(2,5),E(2,6),E(3,4),E(3,5),E(3,6),E(4,6) };
-	Graph crit2 (&crit2_edges[0], &crit2_edges[0] + sizeof(crit2_edges) / sizeof(E), 7);
-	Subgraph<Graph> crit2_sg(crit2, inducer, "crit2");
-	checker.AddInducedGraph(crit2_sg);
-	E crit3_edges[] = { E(0,1),  E(0,3), E(0,5),
-						E(0,6), E(0,8), E(1,2), E(1,8), E(2,3),
-						E(2,5), E(2,7), E(2,8), E(3,4), E(3,7),
-						E(3,9), E(4,5), E(4,9), E(5,6), E(5,9), E(6,7) };
-	Graph crit3 (&crit3_edges[0], &crit3_edges[0] + sizeof(crit3_edges) / sizeof(E), 10);
-	Subgraph<Graph> crit3_sg(crit3, inducer, "crit3");
-	checker.AddInducedGraph(crit3_sg);
-*/
-
 	//generate graphs
 	Graph curr;
 	vector<Graph> graphs;
