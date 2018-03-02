@@ -29,7 +29,7 @@ class GraphExaminer{
 
 public:
 	GraphExaminer(){graph_count_ = 0; };
-	void Examine(int max_v);
+	void Examine(int max_v, vector<string> subgraphs);
 private:
 	int graph_count_;
 	queue<Graph> graphs_queue_;
@@ -43,7 +43,7 @@ private:
 
 	void PrintGraph(const Graph& g);
 	void CheckGraphs(vector<Graph> graphs);
-	void CheckGraph(const Graph& g);
+	bool CheckGraph(const Graph& g);
 };
 
 

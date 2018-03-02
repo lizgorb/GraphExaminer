@@ -54,12 +54,12 @@ vector<vector<int>> PathInducer<Graph>::ListPaths(const Graph& g, int n){
 		// for each vertex
 		for(int i = 0; i <v; i++){
 			// get neighborhood
-			vector<int> neighbors;
+			vector<int> neighbors = this->GetNeighborhood(g, i);
 
-			boost::tie(vi, vi_end) = boost::adjacent_vertices(i, g);
+			/*boost::tie(vi, vi_end) = boost::adjacent_vertices(i, g);
 			for (; vi != vi_end; vi++) {
-				neighbors.push_back(*vi); //get(g, *vi)
-			}
+				neighbors.push_back(*vi);
+			} */
 
 			for (int j = 0; j < v; j++){
 				// j not in i neighborhood

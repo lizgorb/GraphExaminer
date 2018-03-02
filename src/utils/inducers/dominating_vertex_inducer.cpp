@@ -28,10 +28,9 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 	int g_v = boost::num_vertices(g);
 	bool induced = false;
 
-	// if the graphs have the same number of vertices - they should be isomorphic
-	if(g_v == subgraph_v){
-		return this->IsIsomorphic(g, subgraph);
-	}
+	if(g_v == subgraph_v && boost::num_edges(g) == boost::num_edges(subgraph)){
+			return this->IsIsomorphic(g, subgraph);
+		}
 
 	std::pair<vertex_iter, vertex_iter> vp;
 	for (vp = vertices(g); vp.first != vp.second; ++vp.first)
@@ -47,6 +46,7 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 	for(int i=0; i < large_vertices.size() && !induced; i++){
 		large_vertex_neighbors.clear();
 
+		// todo: replace with basic inducer method
 		large_vertex_neighbors.push_back(large_vertices[i]);
 		n = adjacent_vertices(large_vertices[i], g);
 		for(; n.first != n.second; ++n.first){
@@ -63,7 +63,7 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 			for (int i = 0; i < subsets.size() && !induced; i++)
 			{
 				vector<int> subset = subsets[i];
-				induced  = this->IsSubsetInduced(g, subgraph, subset);
+				induced  = this->IsSubsetIsomorpic(g, subgraph, subset);
 			}
 		}
 	}
@@ -75,6 +75,4 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 
 	return induced;
 }
-
-
 

@@ -24,8 +24,10 @@ private:
 	vector< vector<int> > SubsetsOfSize(int n,  int k);
 protected:
 	bool IsIsomorphic(const Graph& g, const Graph& subgraph);
-	bool IsSubsetInduced(const Graph& g, const Graph& subgraph, vector<int> subset);
+	bool IsSubsetIsomorpic(const Graph& g, const Graph& subgraph, vector<int> subset);
 	vector< vector<int> > SubsetsOfSize(vector<int> set,  int k);
+	vector<int> GetNeighborhood(const Graph& g, int i);
+	Graph InduceSubset(const Graph& g, vector<int> subset);
 };
 
 #endif /* UTILS_INDUCERS_BASIC_INDUCER_H_ */

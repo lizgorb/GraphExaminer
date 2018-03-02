@@ -2,18 +2,24 @@
 #include <time.h>
 #include <boost/graph/sequential_vertex_coloring.hpp>
 
-void GraphExaminer::Examine(int max_v) {
+void GraphExaminer::Examine(int max_v, vector<string> subgraphs) {
 	clock_t t;
 	t = clock();
-
-
 
 	// initialize queue with K2
 	E k2_edges[] = { E(0, 1) };
 	Graph k2(&k2_edges[0], &k2_edges[0] + sizeof(k2_edges) / sizeof(E), 2);
 	graphs_queue_.push(k2);
 
-	 /*E test_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,6),E(0,7),
+
+	for(auto sg_name : subgraphs){
+		Subgraph<Graph> sg = SubgraphFactory<Graph>::Create(sg_name);
+		checker.AddInducedGraph(sg);
+	}
+
+	 /*
+	  // tests
+	  E test_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,6),E(0,7),
 				 E(2,7),E(3,7),E(5,7),E(1,8),E(4,8), E(5,8), E(6,8) };
 	 Graph test (&test_edges[0], &test_edges[0] + sizeof(test_edges) / sizeof(E), 9);
 	 Subgraph<Graph> p_test = SubgraphFactory<Graph>::Create("p5");
@@ -30,20 +36,22 @@ void GraphExaminer::Examine(int max_v) {
 
 
 
+/*
+ 	// old problem
 	Subgraph<Graph> k4 = SubgraphFactory<Graph>::Create("k4");
 	checker.AddInducedGraph(k4);
-	Subgraph<Graph> bowtie = SubgraphFactory<Graph>::Create("bowtie");
-	checker.AddInducedGraph(bowtie);
 	Subgraph<Graph> w6 = SubgraphFactory<Graph>::Create("w6");
 	checker.AddInducedGraph(w6);
-
-	 E crit1_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,5),E(3,5),
+	Subgraph<Graph> bowtie = SubgraphFactory<Graph>::Create("bowtie");
+	checker.AddInducedGraph(bowtie);
+	E crit1_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,5),E(3,5),
 			 E(2,6),E(4,6),E(3,7),E(4,7),E(6,7) };
 	 Graph crit1 (&crit1_edges[0], &crit1_edges[0] + sizeof(crit1_edges) / sizeof(E), 8);
 	 BasicInducer<Graph> *inducer = new BasicInducer<Graph>();
-	 Subgraph<Graph> sg(crit1, inducer, "crit1");
-	 checker.AddInducedGraph(sg);
+	 Subgraph<Graph> crit1_sg(crit1, inducer, "crit1");
+	 checker.AddInducedGraph(crit1_sg); */
 /*
+	// path test
 	Subgraph<Graph> k4 = SubgraphFactory<Graph>::Create("k4");
 	checker.AddInducedGraph(k4);
 	Subgraph<Graph> p5 = SubgraphFactory<Graph>::Create("p5");
@@ -81,6 +89,9 @@ void GraphExaminer::Examine(int max_v) {
 		}
 	}
 
+	string f_free;
+	for (auto const& s : subgraphs) { f_free += s + ","; }
+	std::cout << "Examined (" << f_free << ")-free up to "  << max_v << " vertices" << endl;
 	std::cout << "Found " << graph_count_ << " non 3 colorable graphs" << endl;
 	gen.benchmark();
 	checker.benchmark();
@@ -103,14 +114,23 @@ void GraphExaminer::PrintGraph(const Graph& g) {
 }
 
 void GraphExaminer::CheckGraphs(vector<Graph> graphs){
-	for (auto &g : graphs) {
-		CheckGraph(g);
 
+	#pragma omp parallel for
+	for(int x=0; x < graphs.size(); x++)	{
+	//for (Graph &g : graphs) {
+		Graph g = graphs[x];
+		if (CheckGraph(g))
+		{
+			#pragma omp critical
+			{graphs_queue_.push(g);}
+		}
 	}
 };
-void GraphExaminer::CheckGraph(const Graph& g){
+
+bool GraphExaminer::CheckGraph(const Graph& g){
+	bool valid = false;
 	if (!checker.CheckInduced(g) && !hd.CheckEvenHole(g)) {
-		graphs_queue_.push(g);
+		valid = true;
 
 		//  huristic - try 3 coloring
 		vector<vertices_size_type> color_vec(num_vertices(g));
@@ -127,7 +147,12 @@ void GraphExaminer::CheckGraph(const Graph& g){
 				graph_count_++;
 				cout << "Is 3 colorable? " << std::boolalpha << colorable << " : ";
 				PrintGraph(g);
+
+				// no need to keep growing this graph
+				valid = false;
 			}
 		}
 	}
+
+	return valid;
 };

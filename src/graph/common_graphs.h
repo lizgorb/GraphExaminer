@@ -26,6 +26,8 @@ private:
 		static map<string, CommonGraph> common_graphs_;
 		static CommonGraph bowtie;
 		static E bowtie_edges[];
+		static CommonGraph diamond;
+		static E diamond_edges[];
 public:
 		static bool Contains ( string name );
 		static CommonGraph Get( string name );

@@ -7,6 +7,7 @@
 
 #include "graph_generator.h"
 
+//todo: don't add dominated veretices
 template <typename Graph>
 vector<Graph> GraphGenerator<Graph>::AddVertex (const Graph& g)
 {

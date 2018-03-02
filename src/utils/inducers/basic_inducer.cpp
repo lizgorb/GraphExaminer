@@ -21,7 +21,7 @@ bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 	int candidate_v = boost::num_vertices(subgraph);
 
 	// if the graphs have the same number of vertices - they should be isomorphic
-	if(g_v == candidate_v){
+	if(g_v == candidate_v && boost::num_edges(g) == boost::num_edges(subgraph)){
 		return IsIsomorphic(g, subgraph);
 	}
 
@@ -40,7 +40,7 @@ bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 			vector<int> subset = subsets[i];
 			// add the last vertex
 			subset.push_back(g_v - 1);
-			induced  = IsSubsetInduced(g, subgraph, subset);
+			induced  = IsSubsetIsomorpic(g, subgraph, subset);
 		}
 	}
 
@@ -48,9 +48,15 @@ bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 }
 
 template <typename Graph>
-bool BasicInducer<Graph>::IsSubsetInduced(const Graph& g, const Graph& subgraph, vector<int> subset){
+bool BasicInducer<Graph>::IsSubsetIsomorpic(const Graph& g, const Graph& subgraph, vector<int> subset){
+	Graph temp = this->InduceSubset(g, subset);
+	bool induced = IsIsomorphic(temp, subgraph);
+	return induced;
+}
+
+template <typename Graph>
+Graph BasicInducer<Graph>::InduceSubset(const Graph& g, vector<int> subset){
 	Graph temp;
-	bool induced = false;
 	map<int,int> subset_map;
 	//cout << "testing subset: ";
 	int new_index = 0;
@@ -78,8 +84,7 @@ bool BasicInducer<Graph>::IsSubsetInduced(const Graph& g, const Graph& subgraph,
 		}
 	}
 
-	induced = IsIsomorphic(temp, subgraph);
-	return induced;
+	return temp;
 }
 
 template <typename Graph>
@@ -130,4 +135,17 @@ vector< vector<int> > BasicInducer<Graph>::SubsetsOfSize(vector<int> set,  int k
 	}
 
 	return subset_filtered;
+}
+
+template <typename Graph>
+vector<int> BasicInducer<Graph>::GetNeighborhood(const Graph& g, int i){
+	typename boost::graph_traits < Graph >::adjacency_iterator vi, vi_end;
+	// get neighborhood
+	vector<int> neighbors;
+
+	boost::tie(vi, vi_end) = boost::adjacent_vertices(i, g);
+	for (; vi != vi_end; vi++) {
+		neighbors.push_back(*vi); //get(g, *vi)
+	}
+	return neighbors;
 }
