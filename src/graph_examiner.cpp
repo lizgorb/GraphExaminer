@@ -17,11 +17,21 @@ void GraphExaminer::Examine(int max_v, vector<string> subgraphs) {
 		checker.AddInducedGraph(sg);
 	}
 
-	 /*
+
+	/*E crit1_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,5),E(3,5),
+				 E(2,6),E(4,6),E(3,7),E(4,7),E(6,7) };
+		 Graph crit1 (&crit1_edges[0], &crit1_edges[0] + sizeof(crit1_edges) / sizeof(E), 8);
+		 BasicInducer<Graph> *inducer = new BasicInducer<Graph>();
+		 Subgraph<Graph> sg(crit1, inducer, "crit1");
+	checker.AddInducedGraph(sg); */
+
+
 	  // tests
-	  E test_edges[] = { E(0,1),E(0,2),E(0,3),E(1,4),E(0,5),E(1,5),E(2,6),E(0,7),
-				 E(2,7),E(3,7),E(5,7),E(1,8),E(4,8), E(5,8), E(6,8) };
-	 Graph test (&test_edges[0], &test_edges[0] + sizeof(test_edges) / sizeof(E), 9);
+	/*E test_edges[] = { E(0,1),E(0,2),E(0,3),E(0,4),E(1,5),E(1,6),E(5,7)
+			  ,E(2,8), E(6,8),E(2,9),E(5,9),E(7,9),E(8,9) };
+	  Graph test (&test_edges[0], &test_edges[0] + sizeof(test_edges) / sizeof(E), 10);
+	  colorer.ThreeColor(test, color_map);
+
 	 Subgraph<Graph> p_test = SubgraphFactory<Graph>::Create("p5");
 	 if(p_test.IsInduced(test)){  cout << "path is induced" << endl; }
 	 else{ cout << "path is not induced" << endl; }
@@ -71,6 +81,14 @@ void GraphExaminer::PrintGraph(const Graph& g) {
 	std::cout << endl;
 }
 
+void GraphExaminer::PrintColoring(map<int, int> color_map) {
+	for(auto it = color_map.cbegin(); it != color_map.cend(); ++it)
+	{
+		std::cout << it->first << ":" << it->second << ", ";
+	}
+	std::cout<<endl;
+}
+
 void GraphExaminer::CheckGraphs(vector<Graph> graphs){
 
 	#pragma omp parallel for
@@ -109,6 +127,11 @@ bool GraphExaminer::CheckGraph(const Graph& g){
 				// no need to keep growing this graph
 				valid = false;
 			}
+
+			/*if(num_vertices(g) == 11){
+				PrintGraph(g);
+				PrintColoring(color_map);
+			}*/
 		}
 	}
 

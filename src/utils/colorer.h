@@ -28,17 +28,29 @@ public:
     Colorer (){
 		_ThreeColorCalls = 0;
 		_ThreeColorSeconds = 0;
+		debug = false;
 	};
-    bool ThreeColor(const Graph& g,  map<int, int> color_map);
-	bool ThreeColor(const Graph& g,  map<int, int> color_map, string token);
-	 void benchmark() {
+    bool ThreeColor(const Graph& g,  map<int, int> &color_map);
+	bool ThreeColor(const Graph& g,  map<int, int> color_map, string token,
+			map<int,int> &_index_mapping, map<int,int> &_final_color_map );
+	void benchmark() {
 		std::cout << "ThreeColor was called " << _ThreeColorCalls << " times and took " << _ThreeColorSeconds
 				 << "(" << _ThreeColorSeconds/_ThreeColorCalls << " on avg)" << endl;
 	};
 private:
-	vector<int> possibleColors(const Graph& g, int v, map<int, int> color_map);
+	 vector<int> possibleColors(const Graph& g, int v, map<int, int> color_map);
+	 bool ColorWithSameColor(const Graph& g, map<int, int> color_map, string token,
+			int x, int y, vector<int>  x_colors, vector<int>  y_colors,
+			map<int,int> &_index_mapping, map<int,int> &_final_color_map);
+	 bool ColorWithDifferentColor(const Graph& g, map<int, int> color_map, string token,
+			int x, int y, vector<int>  x_colors, vector<int>  y_colors,
+			map<int,int> &_index_mapping, map<int,int> &_final_color_map);
+
+	 void initIndexMap(int length, map<int,int> &_index_mapping);
+	 void initColorMap(int length, map<int,int> &_final_color_map);
 	 int _ThreeColorCalls;
 	 float _ThreeColorSeconds;
+	 bool debug;
 };
 
 #endif /* COLORER_H_ */

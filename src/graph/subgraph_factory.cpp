@@ -15,6 +15,7 @@
 #include "../utils/inducers/dominating_vertex_inducer.cpp"
 #include "../utils/inducers/clique_inducer.cpp"
 #include "../utils/inducers/path_inducer.cpp"
+#include "../utils/inducers/diamond_inducer.cpp"
 
 #include <iostream>
 #include <regex>
@@ -35,6 +36,9 @@ Subgraph<Graph> SubgraphFactory<Graph>::Create(string name){
 		//todo Create inducer factory add strategy to graph families/common graphs
 		if (name == "bowtie"){
 			inducer = new DominatingVertexInducer<Graph>(4);
+		}
+		else if(name == "diamond"){
+			inducer = new DiamondInducer<Graph>();
 		}
 	}
 	else if(regex_match (name, reg_complete))

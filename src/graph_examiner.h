@@ -44,6 +44,7 @@ private:
 	void PrintGraph(const Graph& g);
 	void CheckGraphs(vector<Graph> graphs);
 	bool CheckGraph(const Graph& g);
+	void PrintColoring(map<int, int> color_map);
 };
 
 

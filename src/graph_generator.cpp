@@ -25,9 +25,9 @@ vector<Graph> GraphGenerator<Graph>::AddVertex (const Graph& g)
 
   vector<Graph> graphs;
 
-  Graph curr;
   // add edges
   for (int i = 0; i < subsets.size(); i++){
+	  Graph curr;
 	  vector<int> subset = subsets[i];
 	  int edges = subset.size();
 	  if (edges > 0){
@@ -86,7 +86,7 @@ string GraphGenerator<Graph>::getSignature(const Graph& g){
 	// todo:  Find a way to stick this property to graph objects
 	// it can then be more efficiently constructed
 	clock_t t = clock();
-	string sig = Signature2(g);
+	string sig = Signature3(g);
 	 _getSignatureSeconds += ((float)(clock() - t))/CLOCKS_PER_SEC;
 	return sig;
 }
@@ -139,13 +139,42 @@ string GraphGenerator<Graph>::Signature2(const Graph& g){
 }
 
 template <typename Graph>
+string GraphGenerator<Graph>::Signature3(const Graph& g){
+	int nV = boost::num_vertices(g);
+		int v_degrees[nV];
+		for(int i=0; i < nV; i++){
+			v_degrees[i] = boost::degree(i, g);
+		}
+
+		std::pair<adjacency_iterator,adjacency_iterator> n;
+		std::pair<int, int> adj[nV];
+		for(int i=0; i < nV; i++){
+			n = adjacent_vertices(i, g);
+
+			int count = 0;
+			for(; n.first != n.second; ++n.first){
+				count += v_degrees[*n.first];
+			}
+			adj[i] = std::pair<int,int>(v_degrees[i], count);
+		}
+
+		sort(adj, adj + nV);
+
+		 stringstream  sig("");
+		 for (int i = 0; i < nV; i++)
+			 sig << adj[i].first << "-"<< adj[i].second << ",";
+
+		 return sig.str();
+}
+
+template <typename Graph>
 bool GraphGenerator<Graph>::checkIsomorphic(const Graph& curr){
 	clock_t t = clock();
 
 	  bool iso = false;
 
 	 string key = getSignature(curr);
-
+	 //std::cout << "key:"<< key<< endl;
 
 	 // check isomorphisms
 	 for (auto &iso_g : iso_graphs[key])

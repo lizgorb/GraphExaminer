@@ -12,6 +12,45 @@
 #include <iostream>
 #include <algorithm>
 #include <boost/graph/bron_kerbosch_all_cliques.hpp>
+#include <boost/graph/depth_first_search.hpp>
+
+using namespace boost;
+
+class TriangleVisitor : public boost::default_dfs_visitor {
+public:
+	TriangleVisitor(vector<vector<int>>& triangles, vector<int>& parents) :
+		triangles_(triangles), parents_(parents)  { }
+
+	template < typename Edge, typename Graph >
+	void tree_edge(Edge e, const Graph &g)
+	{
+		int s = source(e, g);
+		int t = target(e, g);
+		if(parents_[t] == -1){
+			parents_[t] = s;
+		}
+	}
+
+    template < typename Edge, typename Graph >
+    void back_edge(Edge e, const Graph &g)
+    {
+    	int s = source(e, g);
+    	int t = target(e, g);
+    	if(parents_[t] != s && parents_[parents_[s]] == t){
+    		vector<int> triangle = {parents_[s], s, t};
+    		triangles_.push_back(triangle);
+    	}
+    }
+
+    bool HasTriangles()  {
+    	return triangles_.size() > 0;
+    }
+private:
+    vector<int>& parents_;
+    vector<vector<int>>& triangles_;
+};
+
+
 
 class InducedCliqueVisitor
 {
@@ -47,6 +86,7 @@ public:
 	bool IsInduced(const Graph& g, const Graph& subgraph);
 private:
 	int clique_size;
+	bool IsInducedK4(const Graph& g);
 };
 
 #endif /* UTILS_INDUCERS_CLIQUE_INDUCER_H_ */

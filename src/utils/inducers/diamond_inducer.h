@@ -14,6 +14,8 @@ template <typename Graph>
 class DiamondInducer : public BasicInducer<Graph>  {
 public:
 	bool IsInduced(const Graph& g, const Graph& subgraph);
+private:
+	bool IsCentralVertex(const Graph& g, int i);
 };
 
 #endif /* UTILS_INDUCERS_DIAMOND_INDUCER_H_ */

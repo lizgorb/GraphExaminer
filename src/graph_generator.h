@@ -61,6 +61,7 @@ class GraphGenerator {
     string getSignature(const Graph& g);
     string Signature1(const Graph& g);
     string Signature2(const Graph& g);
+    string Signature3(const Graph& g);
     bool checkIsomorphic(const Graph& g);
 };
 
