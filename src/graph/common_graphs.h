@@ -28,6 +28,11 @@ private:
 		static E bowtie_edges[];
 		static CommonGraph diamond;
 		static E diamond_edges[];
+		static E kite_edges[];
+		static CommonGraph kite;
+		static E bicycle_edges[];
+		static CommonGraph bicycle;
+
 public:
 		static bool Contains ( string name );
 		static CommonGraph Get( string name );

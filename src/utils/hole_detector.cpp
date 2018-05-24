@@ -11,7 +11,8 @@ using namespace boost;
 
 template <typename Graph>
 bool HoleDetector<Graph>::CheckEvenHole (const Graph& g){
-	_CheckEvenHoleCalls++;
+	#pragma omp critical
+	{_CheckEvenHoleCalls++;}
 	clock_t t;
 	t = clock();
 
@@ -35,6 +36,7 @@ bool HoleDetector<Graph>::CheckEvenHole (const Graph& g){
 	 // Use the Tiernan algorithm to visit all cycles
 	 tiernan_all_cycles(udg, vis);
 
-	 _CheckEvenHoleSeconds += ((float)(clock() - t))/CLOCKS_PER_SEC;
+	#pragma omp critical
+	 { _CheckEvenHoleSeconds += ((float)(clock() - t))/CLOCKS_PER_SEC;}
 	 return vis.has_even_hole();
 }

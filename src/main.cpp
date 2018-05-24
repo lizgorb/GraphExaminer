@@ -33,16 +33,17 @@ void handler(int sig) {
 int main(int argc, char **argv){
 	signal(SIGSEGV, handler);
 
-	if(argc > 2){
+	if(argc > 3){
 		int max_v = std::stoi(argv[1]);
-		std::vector<std::string> subgraphs(argv + 2, argv + argc);
+		int color_limit = std::stoi(argv[2]);
+		std::vector<std::string> subgraphs(argv + 3, argv + argc);
 		GraphExaminer ge;
 
 		auto start = std::chrono::system_clock::now();
 		std::time_t start_time = std::chrono::system_clock::to_time_t(start);
 		std::cout << "Started at " << std::ctime(&start_time);
 
-		ge.Examine(max_v, subgraphs);
+		ge.Examine(max_v, color_limit, subgraphs);
 
 		auto end = std::chrono::system_clock::now();
 		std::time_t end_time = std::chrono::system_clock::to_time_t(end);

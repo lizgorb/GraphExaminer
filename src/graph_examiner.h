@@ -29,7 +29,7 @@ class GraphExaminer{
 
 public:
 	GraphExaminer(){graph_count_ = 0; };
-	void Examine(int max_v, vector<string> subgraphs);
+	void Examine(int max_v, int color_limit, vector<string> subgraphs);
 private:
 	int graph_count_;
 	queue<Graph> graphs_queue_;
@@ -37,13 +37,13 @@ private:
 	InducedCheck<Graph> checker;
 	HoleDetector<Graph> hd;
 	Colorer<Graph> colorer;
-	map<int, int> color_map;
 
 	//vector<Gragh> vg_;
 
 	void PrintGraph(const Graph& g);
-	void CheckGraphs(vector<Graph> graphs);
-	bool CheckGraph(const Graph& g);
+	void PrintDegrees(const Graph& g);
+	void CheckGraphs(vector<Graph> graphs, int color_limit);
+	bool CheckGraph(const Graph& g, int color_limit);
 	void PrintColoring(map<int, int> color_map);
 };
 

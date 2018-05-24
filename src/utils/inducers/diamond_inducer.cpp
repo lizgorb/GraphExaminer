@@ -33,6 +33,7 @@ bool DiamondInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 	if(!induced){
 		// the neighborhood consists of disjoint cliques
 		vector<int> neighbors = this->GetNeighborhood(g,last_vertex_i);
+		sort(neighbors.begin(), neighbors.end());
 
 		// for all pairs
 		for (int i=0; i < neighbors.size() && !induced; i++ ){
@@ -54,9 +55,18 @@ bool DiamondInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 							 neighbors_y.begin(),neighbors_y.end(),
 							 back_inserter(intersection));
 
-					 // if they have more than one - it's a diamond
+					 // if they have more than one
 					 if(intersection.size() > 1){
-						 induced = true;
+						 // that is not a neighbor of the current vertex- it's a diamond
+						 sort(intersection.begin(), intersection.end());
+
+						 vector<int> cliqueIntersection;
+						 set_intersection(intersection.begin(),intersection.end(),
+								 neighbors.begin(),neighbors.end(),
+								 back_inserter(cliqueIntersection));
+						 if(cliqueIntersection.size() <  intersection.size() - 1 ){
+							 induced = true;
+						 }
 					 }
 				}
 			}

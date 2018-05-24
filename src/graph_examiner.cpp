@@ -2,9 +2,12 @@
 #include <time.h>
 #include <boost/graph/sequential_vertex_coloring.hpp>
 
-void GraphExaminer::Examine(int max_v, vector<string> subgraphs) {
+void GraphExaminer::Examine(int max_v, int color_limit, vector<string> subgraphs) {
 	clock_t t;
 	t = clock();
+
+
+	colorer.setColorLimit(color_limit);
 
 	// initialize queue with K2
 	E k2_edges[] = { E(0, 1) };
@@ -26,15 +29,20 @@ void GraphExaminer::Examine(int max_v, vector<string> subgraphs) {
 	checker.AddInducedGraph(sg); */
 
 
-	  // tests
-	/*E test_edges[] = { E(0,1),E(0,2),E(0,3),E(0,4),E(1,5),E(1,6),E(5,7)
-			  ,E(2,8), E(6,8),E(2,9),E(5,9),E(7,9),E(8,9) };
-	  Graph test (&test_edges[0], &test_edges[0] + sizeof(test_edges) / sizeof(E), 10);
-	  colorer.ThreeColor(test, color_map);
 
-	 Subgraph<Graph> p_test = SubgraphFactory<Graph>::Create("p5");
-	 if(p_test.IsInduced(test)){  cout << "path is induced" << endl; }
-	 else{ cout << "path is not induced" << endl; }
+	  // tests
+	 /*
+	 max_v = 0;
+     map<int, int> color_map;
+	 E test_edges[] = { E(0,1),E(0,3),E(1,2),E(1,3), E(2,3)};
+	  Graph test (&test_edges[0], &test_edges[0] + sizeof(test_edges) / sizeof(E), 4);
+	  colorer.ThreeColor(test, color_map);
+	  PrintColoring(color_map);
+
+	Subgraph<Graph> p_test = SubgraphFactory<Graph>::Create("diamond");
+	 if(p_test.IsInduced(test)){  cout << "diamond is induced" << endl; }
+	 else{ cout << "diamond is not induced" << endl; }
+	 */
 
 	 /*vector<vertices_size_type> color_vec(num_vertices(test));
 	iterator_property_map<vertices_size_type*, vertex_index_map> color(
@@ -53,14 +61,14 @@ void GraphExaminer::Examine(int max_v, vector<string> subgraphs) {
 		graphs_queue_.pop();
 		if (boost::num_vertices(curr) + 1 <= max_v) {
 			graphs = gen.AddVertex(curr);
-			CheckGraphs(graphs);
+			CheckGraphs(graphs, color_limit);
 		}
 	}
 
 	string f_free;
 	for (auto const& s : subgraphs) { f_free += s + ","; }
 	std::cout << "Examined (" << f_free << ")-free up to "  << max_v << " vertices" << endl;
-	std::cout << "Found " << graph_count_ << " non 3 colorable graphs" << endl;
+	std::cout << "Found " << graph_count_ << " non "<< color_limit << " colorable graphs" << endl;
 	gen.benchmark();
 	checker.benchmark();
 	hd.benchmark();
@@ -81,6 +89,14 @@ void GraphExaminer::PrintGraph(const Graph& g) {
 	std::cout << endl;
 }
 
+void GraphExaminer::PrintDegrees(const Graph& g) {
+	std::cout << "Degrees: ";
+	for (int i = 0; i < num_vertices(g); i++) {
+		std::cout << boost::degree(i, g) << ",";
+	}
+	std::cout << endl;
+}
+
 void GraphExaminer::PrintColoring(map<int, int> color_map) {
 	for(auto it = color_map.cbegin(); it != color_map.cend(); ++it)
 	{
@@ -89,13 +105,13 @@ void GraphExaminer::PrintColoring(map<int, int> color_map) {
 	std::cout<<endl;
 }
 
-void GraphExaminer::CheckGraphs(vector<Graph> graphs){
+void GraphExaminer::CheckGraphs(vector<Graph> graphs, int color_limit){
 
 	#pragma omp parallel for
 	for(int x=0; x < graphs.size(); x++)	{
 	//for (Graph &g : graphs) {
 		Graph g = graphs[x];
-		if (CheckGraph(g))
+		if (CheckGraph(g, color_limit))
 		{
 			#pragma omp critical
 			{graphs_queue_.push(g);}
@@ -103,35 +119,44 @@ void GraphExaminer::CheckGraphs(vector<Graph> graphs){
 	}
 };
 
-bool GraphExaminer::CheckGraph(const Graph& g){
+bool GraphExaminer::CheckGraph(const Graph& g, int color_limit){
 	bool valid = false;
+	map<int, int> color_map;
+
 	if (!checker.CheckInduced(g) && !hd.CheckEvenHole(g)) {
 		valid = true;
-
-		//  huristic - try 3 coloring
+		//  huristic - try k coloring
 		vector<vertices_size_type> color_vec(num_vertices(g));
 		iterator_property_map<vertices_size_type*, vertex_index_map> color(
 				&color_vec.front(), get(vertex_index, g));
 		vertices_size_type num_colors = sequential_vertex_coloring(
 				g, color);
-		if (num_colors > 3) {
+		if (num_colors > color_limit) {
 			color_map.clear();
 			bool colorable = colorer.ThreeColor(g, color_map);
+			//PrintDegrees(g);
 
-			// really check 3 coloring
+			// really check k coloring
 			if (!colorable) {
-				graph_count_++;
-				cout << "Is 3 colorable? " << std::boolalpha << colorable << " : ";
-				PrintGraph(g);
+				#pragma omp critical
+				{
+					graph_count_++;
+					cout << "Is " << color_limit<< " colorable? " << std::boolalpha << colorable << " : ";
+					PrintGraph(g);
+					BasicInducer<Graph> *inducer = new BasicInducer<Graph>();
+					Subgraph<Graph> sg(g, inducer, "crit" + to_string(graph_count_));
+					checker.AddInducedGraph(sg);
 
-				// no need to keep growing this graph
-				valid = false;
+
+					// no need to keep growing this graph
+					valid = false;
+				}
 			}
 
-			/*if(num_vertices(g) == 11){
-				PrintGraph(g);
-				PrintColoring(color_map);
-			}*/
+//			if(num_vertices(g) == 11){
+//				PrintGraph(g);
+//				PrintColoring(color_map);
+//			}
 		}
 	}
 

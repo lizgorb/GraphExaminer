@@ -51,7 +51,8 @@ class InducedCheck {
 
 template <typename Graph>
 bool InducedCheck<Graph>::CheckInduced (const Graph& g){
-	check_induced_calls_++;
+	#pragma omp critical
+	{check_induced_calls_++;}
 	clock_t t;
 	clock_t t_subgraph;
 	t = clock();
@@ -64,11 +65,12 @@ bool InducedCheck<Graph>::CheckInduced (const Graph& g){
 		}
 		t_subgraph = clock();
 		induced = candidate_g.IsInduced(g);
-		subgraph_induced_seconds_[candidate_g.name] += ((float)(clock() - t_subgraph))/CLOCKS_PER_SEC;
+		#pragma omp critical
+		{subgraph_induced_seconds_[candidate_g.name] += ((float)(clock() - t_subgraph))/CLOCKS_PER_SEC;}
 
 	}
-
-	check_induced_seconds_  += ((float)(clock() - t))/CLOCKS_PER_SEC;
+	#pragma omp critical
+	{check_induced_seconds_  += ((float)(clock() - t))/CLOCKS_PER_SEC;}
 	return induced;
 }
 
