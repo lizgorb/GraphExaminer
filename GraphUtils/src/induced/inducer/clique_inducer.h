@@ -12,7 +12,8 @@
 #include <algorithm>
 #include <boost/graph/bron_kerbosch_all_cliques.hpp>
 #include <boost/graph/depth_first_search.hpp>
-#include "basic_inducer.hpp"
+
+#include "../inducer/basic_inducer.hpp"
 
 using namespace boost;
 

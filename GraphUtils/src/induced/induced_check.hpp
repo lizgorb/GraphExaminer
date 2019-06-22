@@ -18,7 +18,7 @@
 #include <boost/graph/subgraph.hpp>
 #include <time.h>
 #include <iostream>
-#include "../graph/subgraph.hpp"
+#include "subgraph.hpp"
 
 using namespace std;
 

@@ -8,7 +8,7 @@
 #ifndef UTILS_INDUCERS_DIAMOND_INDUCER_H_
 #define UTILS_INDUCERS_DIAMOND_INDUCER_H_
 
-#include "basic_inducer.hpp"
+#include "../inducer/basic_inducer.hpp"
 
 template <typename Graph>
 class DiamondInducer : public BasicInducer<Graph>  {

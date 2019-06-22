@@ -5,7 +5,7 @@
  *      Author: liz
  */
 
-#include "bicycleinducer.h"
+#include "../inducer/bicycleinducer.h"
 
 bicycle_inducer::bicycle_inducer() {
 	// TODO Auto-generated constructor stub

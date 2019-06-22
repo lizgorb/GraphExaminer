@@ -9,7 +9,7 @@
 #define GRAPH_SUBGRAPH_HPP_
 
 #include <string>
-#include "../induced/basic_inducer.hpp"
+#include "inducer/basic_inducer.hpp"
 
 template <typename Graph>
 class Subgraph {
@@ -27,7 +27,6 @@ public:
 
 	bool IsInduced(const Graph& g){
 		return inducer->IsInduced(g, graph);
-
 	}
 
 private:

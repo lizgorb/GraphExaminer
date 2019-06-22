@@ -22,7 +22,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_iterator.hpp>
 
-#include "basic_inducer.hpp"
+#include "../inducer/basic_inducer.hpp"
 
 using namespace boost;
 using namespace std;

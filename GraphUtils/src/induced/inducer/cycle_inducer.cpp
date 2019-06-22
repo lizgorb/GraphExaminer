@@ -5,7 +5,7 @@
  *      Author: Liz
  */
 
-#include "cycle_inducer.h"
+#include "../inducer/cycle_inducer.h"
 
 using namespace boost;
 

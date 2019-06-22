@@ -5,7 +5,8 @@
  *      Author: liz
  */
 
-#include "clique_inducer.h"
+#include "../inducer/clique_inducer.h"
+
 #include <vector>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>

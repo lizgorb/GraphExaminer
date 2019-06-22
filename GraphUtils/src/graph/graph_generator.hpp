@@ -22,97 +22,101 @@
 #include <iostream>
 #include <time.h>
 
-#include "common_utils.hpp"
+#include "../common_utils.hpp"
 using namespace std;
 
-
-template <typename Graph>
+template<typename Graph>
 class GraphGenerator {
 
 	typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_t;
 	typedef typename boost::graph_traits<Graph>::edge_descriptor edge_t;
 	typedef typename boost::graph_traits<Graph>::adjacency_iterator adjacency_iterator;
 
-  public:
-    GraphGenerator (){
-    	_addVertexCalls = 0;
-    	_addVertexSeconds = 0;
-    	_isoChecks = _isoCheckSeconds = _getSignatureSeconds = 0;
-    };
-    vector<Graph> AddVertex(const Graph& g);
-    static Graph RandomGraph(int n);
-    void benchmark() {
-    	std::cout << "addVertex was called " << _addVertexCalls << " times and took " << _addVertexSeconds
-    			 << "(" << _addVertexSeconds/_addVertexCalls << " on avg)" << endl;
-    	std::cout << "	isoCheck was made " << _isoChecks << " times and took " << _isoCheckSeconds  << endl;
-    	std::cout << "	signature computation took " << _getSignatureSeconds << " seconds " <<  endl;
-    	int unique = 0;
-    	for (auto const& x : iso_graphs)
-    	{
-    		unique += x.second.size();
-    	}
+public:
+	GraphGenerator() {
+		_addVertexCalls = 0;
+		_addVertexSeconds = 0;
+		_isoChecks = _isoCheckSeconds = _getSignatureSeconds = 0;
+	}
+	;
+	vector<Graph> AddVertex(const Graph& g);
+	static Graph RandomGraph(int n);
+	void benchmark() {
+		std::cout << "addVertex was called " << _addVertexCalls
+				<< " times and took " << _addVertexSeconds << "("
+				<< _addVertexSeconds / _addVertexCalls << " on avg)" << endl;
+		std::cout << "	isoCheck was made " << _isoChecks << " times and took "
+				<< _isoCheckSeconds << endl;
+		std::cout << "	signature computation took " << _getSignatureSeconds
+				<< " seconds " << endl;
+		int unique = 0;
+		for (auto const& x : iso_graphs) {
+			unique += x.second.size();
+		}
 
-
-    	std::cout << "	iso_graphs has " << iso_graphs.size() << " keys and " << unique << " values"  << endl;
-    };
-  private:
-    int _addVertexCalls;
-    float _addVertexSeconds;
-    int _isoChecks;
-    float _isoCheckSeconds;
-    float _getSignatureSeconds;
-    std::map<string,vector<Graph>> iso_graphs;
-    string getSignature(const Graph& g);
-    string Signature1(const Graph& g);
-    string Signature2(const Graph& g);
-    string Signature3(const Graph& g);
-    bool checkIsomorphic(const Graph& g);
+		std::cout << "	iso_graphs has " << iso_graphs.size() << " keys and "
+				<< unique << " values" << endl;
+	}
+	;
+private:
+	bool debug = false;
+	int _addVertexCalls;
+	float _addVertexSeconds;
+	int _isoChecks;
+	float _isoCheckSeconds;
+	float _getSignatureSeconds;
+	std::map<string, vector<Graph>> iso_graphs;
+	string getSignature(const Graph& g);
+	string Signature1(const Graph& g);
+	string Signature2(const Graph& g);
+	string Signature3(const Graph& g);
+	bool checkIsomorphic(const Graph& g);
 };
 
-
 template<typename Graph>
-Graph GraphGenerator<Graph>::RandomGraph(int n){
+Graph GraphGenerator<Graph>::RandomGraph(int n) {
 	typedef std::pair<int, int> E;
 
-	int max_edges = (n * (n-1)) / 2;
-	int min_edges = floor (1.5* n);
+	int max_edges = (n * (n - 1)) / 2;
+	int min_edges = floor(1.5 * n);
 	int num_edges = (rand() % (max_edges - min_edges)) + min_edges;
 
 	// create all subsets of size 2
 	vector<vector<int>> all_subsets = CommonUtils::SubsetsOfSize(n, 2);
 
 	// choose random num_edges from subsets
-	std::random_shuffle ( all_subsets.begin(), all_subsets.end() );
+	std::random_shuffle(all_subsets.begin(), all_subsets.end());
 
-	Graph random (n);
+	Graph random(n);
 	int edges_count = 0;
 
-	while (edges_count < num_edges){
-		boost::add_edge(all_subsets[edges_count][0], all_subsets[edges_count][1] ,random);
+	while (edges_count < num_edges) {
+		boost::add_edge(all_subsets[edges_count][0],
+				all_subsets[edges_count][1], random);
 		edges_count++;
 
 	}
 
 	// if the graph is disconnected add more edges until it becomes connected
 	std::vector<int> component(n);
-	size_t num_components = boost::connected_components (random, &component[0]);
-	while (num_components > 1){
-		boost::add_edge(all_subsets[edges_count][0], all_subsets[edges_count][1] ,random);
+	size_t num_components = boost::connected_components(random, &component[0]);
+	while (num_components > 1) {
+		boost::add_edge(all_subsets[edges_count][0],
+				all_subsets[edges_count][1], random);
 		edges_count++;
-		num_components = boost::connected_components (random, &component[0]);
+		num_components = boost::connected_components(random, &component[0]);
 	}
 
 	return random;
 }
 
-//todo: don't add dominated veretices
+
+// Generates all connected unique graphs from the given graph + 1 vertex
 template<typename Graph>
 vector<Graph> GraphGenerator<Graph>::AddVertex(const Graph& g) {
 	_addVertexCalls++;
 	clock_t t;
 	t = clock();
-
-	//std::cout << "adding vertex\n";
 
 	int nV = boost::num_vertices(g);
 
@@ -126,8 +130,6 @@ vector<Graph> GraphGenerator<Graph>::AddVertex(const Graph& g) {
 #pragma omp parallel for
 	for (int i = 0; i < subsets.size(); i++) {
 
-		//int tid = omp_get_thread_num();
-
 		Graph temp = g;
 		Graph curr;
 		vector<int> subset = subsets[i];
@@ -135,7 +137,6 @@ vector<Graph> GraphGenerator<Graph>::AddVertex(const Graph& g) {
 		if (edges > 0) {
 			curr.clear();
 			copy_graph(temp, curr);
-			//int tid = omp_get_thread_num();
 			vertex_t v = boost::add_vertex(curr);
 
 			edge_t e;
@@ -169,7 +170,6 @@ vector<Graph> GraphGenerator<Graph>::AddVertex(const Graph& g) {
 
 	return graphs;
 }
-
 
 template<typename Graph>
 string GraphGenerator<Graph>::getSignature(const Graph& g) {
@@ -225,7 +225,6 @@ string GraphGenerator<Graph>::Signature2(const Graph& g) {
 	stringstream sig("");
 	for (int i = 0; i < nV; i++)
 		sig << adj[i] << ",";
-	//sig << "(" << v_neighbors[i] << ")";
 	return sig.str();
 }
 
@@ -269,8 +268,7 @@ bool GraphGenerator<Graph>::checkIsomorphic(const Graph& curr) {
 		key = getSignature(curr);
 	}
 
-	//std::cout << "key:"<< key<< endl;
-	vector<Graph> key_graphs ;
+	vector<Graph> key_graphs;
 #pragma omp critical
 	{
 		key_graphs = iso_graphs[key];
@@ -281,15 +279,23 @@ bool GraphGenerator<Graph>::checkIsomorphic(const Graph& curr) {
 		{
 			_isoChecks++;
 		}
-		/*std::cout << "checking if: ";
-		 for (typename Graph::edge_iterator ei = boost::edges(curr).first; ei != boost::edges(curr).second; ei++) {
-		 std::cout << "(" << source(*ei, curr) << "-" << target(*ei,curr) <<  ")";
-		 }
-		 std::cout << " is isomoriphic to: ";
-		 for (typename Graph::edge_iterator ei = boost::edges(iso_g).first; ei != boost::edges(iso_g).second; ei++) {
-		 std::cout << "(" << source(*ei, iso_g) << "-" << target(*ei,iso_g) <<  ")";
-		 }
-		 std::cout << endl;*/
+
+		if (debug) {
+			std::cout << "key:"<< key<< endl;
+			std::cout << "checking if: ";
+			for (typename Graph::edge_iterator ei = boost::edges(curr).first;
+					ei != boost::edges(curr).second; ei++) {
+				std::cout << "(" << source(*ei, curr) << "-"
+						<< target(*ei, curr) << ")";
+			}
+			std::cout << " is isomoriphic to: ";
+			for (typename Graph::edge_iterator ei = boost::edges(iso_g).first;
+					ei != boost::edges(iso_g).second; ei++) {
+				std::cout << "(" << source(*ei, iso_g) << "-"
+						<< target(*ei, iso_g) << ")";
+			}
+			std::cout << endl;
+		}
 		iso = boost::isomorphism(curr, iso_g);
 		if (iso) {
 			break;

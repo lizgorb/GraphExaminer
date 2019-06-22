@@ -5,7 +5,8 @@
  *      Author: liz
  */
 
-#include "diamond_inducer.h"
+#include "../inducer/diamond_inducer.h"
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 #include <iostream>
