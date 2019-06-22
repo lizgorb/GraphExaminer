@@ -1,0 +1,146 @@
+
+<!doctype html>
+<html>
+<head>
+  <title>Graph Visualiser</title>
+
+  <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>-->
+  <script type="text/javascript" src="vis.js"></script>
+  <script type="text/javascript" src='jquery-3.3.1.min.js'></script>
+  <script type="text/javascript" src='spectrum.js'></script>
+  <link href="vis-network.min.css" rel="stylesheet" type="text/css"/>
+  <link rel='stylesheet' href='spectrum.css' />
+
+  <style type="text/css">
+    #mynetwork {
+      width: 1000px;
+      height: 500px;
+      border: 1px solid lightgray;
+    }
+  </style>
+</head>
+<body>
+<div>
+  <input id="edgesInput"  onchange="redrawGraph()" style="width: 1000px;height: 26px"/>
+  <input type='text' class='startEmpty' id="colorPicker" />
+</div>
+
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+
+
+  function redrawGraph() {
+    let edgeList = document.getElementById('edgesInput').value.split(' ')
+    var nodesCount = 0
+    var nodesData = []
+    var edgesData = []
+    edgeList.forEach(function(entry) {
+        u = entry.split('--')[0];
+        v = entry.split('--')[1];
+        edgesData.push( {from: parseInt(u), to: parseInt(v)})
+        x = Math.max(parseInt(u), parseInt(v))
+        if (x > nodesCount){
+          nodesCount = x
+        }
+    })
+    for (var i = 0; i <= nodesCount; i++) { 
+      nodesData.push( {id: i, label: i.toString()})
+    }
+    var nodes = new vis.DataSet(nodesData)
+    var edges = new vis.DataSet(edgesData)
+    drawGraph(edges, nodes)
+  }
+
+  function drawGraph(edges, nodes) {
+    // create a network
+    var container = document.getElementById('mynetwork');
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+    var options = { 
+      physics:{
+        enabled: false,
+      },
+      interaction:{hover: true},
+      manipulation: {
+        enabled: true,
+      },
+      edges:{
+        smooth: {
+          enabled: false,
+        },
+        color:{
+        	color:'black',
+        	inherit: false,
+        }
+      },
+      nodes:{
+      	color:{
+      		background: '#FFFFFF'
+      	}
+      }      
+    };
+    var network = new vis.Network(container, data, options);
+
+    network.on("click", function (params) {
+
+      nodeID = this.getNodeAt(params.pointer.DOM)
+      if (nodeID)
+      {
+      	
+      	pickColor(nodeID, nodes)
+	  }     
+    });
+}
+
+	function pickColor(nodeId, nodes)
+	{
+		node = nodes.get(nodeId);
+		color = $("#colorPicker").spectrum("get");
+		console.log(color)
+		nodes.update({id: nodeID, color:  '#' + color.toHex()});
+	}
+
+  // create an array with nodes
+  var nodes = new vis.DataSet([
+    {id: 1, label: 'Node 1'},
+    {id: 2, label: 'Node 2'},
+    {id: 3, label: 'Node 3'},
+    {id: 4, label: 'Node 4'},
+    {id: 5, label: 'Node 5'}
+  ]);
+
+  // create an array with edges
+  var edges = new vis.DataSet([
+    {from: 1, to: 3},
+    {from: 1, to: 2},
+    {from: 2, to: 4},
+    {from: 2, to: 5},
+    {from: 3, to: 3}
+  ]);
+
+  drawGraph(edges, nodes);
+
+  $("#colorPicker").spectrum({
+    showPaletteOnly: true,
+    togglePaletteOnly: true,
+    showSelectionPalette: false,
+    togglePaletteMoreText: 'more',
+    togglePaletteLessText: 'less',
+    color: '#fff',
+    allowEmpty:true,
+    preferredFormat: "name",
+    palette: [
+        ["#fff", "#f00","#f90","#ff0","#0f0","#0ff","#00f","#90f","#f0f"],
+    ]
+});
+
+
+  
+</script>
+
+
+</body>
+</html>
