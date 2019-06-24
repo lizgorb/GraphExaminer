@@ -16,6 +16,7 @@
 #include <boost/property_map/property_map.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/subgraph.hpp>
+#include "../../common_utils.hpp"
 
 using namespace std;
 
@@ -25,19 +26,16 @@ typedef  typename Graph::vertex_descriptor vertex_t;
 typedef  map<vertex_t, size_t> IndexMap;
 
 public:
-	virtual bool IsInduced(const Graph& g, const Graph& subgraph);
-private:
-	vector< vector<int> > SubsetsOfSize(int n,  int k);
+	virtual bool IsInduced(const Graph& g, const Graph& subgraph, bool include_last  = false);
 protected:
 	bool IsIsomorphic(const Graph& g, const Graph& subgraph);
 	bool IsSubsetIsomorpic(const Graph& g, const Graph& subgraph, vector<int> subset);
-	vector< vector<int> > SubsetsOfSize(vector<int> set,  int k);
 	vector<int> GetNeighborhood(const Graph& g, int i);
 	Graph InduceSubset(const Graph& g, vector<int> subset);
 };
 
 template <typename Graph>
-bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
+bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph, bool include_last){
 	bool induced = false;
 	int g_v = boost::num_vertices(g);
 	int candidate_v = boost::num_vertices(subgraph);
@@ -52,20 +50,22 @@ bool BasicInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
 		int array[g_v];
 		for( int i = 0; i < g_v; i++ ) {  array[i] = i; }
 
-		IndexMap mapIndex;
-		boost::associative_property_map<IndexMap> propmapIndex(mapIndex);
-
+		vector< vector<int> > subsets;
 		// get all subsets without the last vertex
-		// TODO: uncomment
-		//vector< vector<int> > subsets = SubsetsOfSize(g_v - 1,candidate_v - 1);
+		if(include_last){
+			subsets = CommonUtils::SubsetsOfSize(g_v - 1,candidate_v - 1);
+		}
+		else{
+			subsets = CommonUtils::SubsetsOfSize(g_v,candidate_v);
+		}
 
-		vector< vector<int> > subsets = SubsetsOfSize(g_v,candidate_v);
 		for (int i = 0; i < subsets.size() && !induced; i++)
 		{
 			vector<int> subset = subsets[i];
-			// add the last vertex
-			// TODO: uncomment
-			//subset.push_back(g_v - 1);
+			if(include_last){
+				subset.push_back(g_v - 1);
+			}
+
 			induced  = IsSubsetIsomorpic(g, subgraph, subset);
 		}
 	}
@@ -84,15 +84,12 @@ template <typename Graph>
 Graph BasicInducer<Graph>::InduceSubset(const Graph& g, vector<int> subset){
 	Graph temp;
 	map<int,int> subset_map;
-	//cout << "testing subset: ";
 	int new_index = 0;
 	for (auto &n : subset)
 	{
-	//cout << n;
 		subset_map[n] = new_index;
 		new_index++;
 	}
-	//cout << endl;
 	temp.clear();
 	// generate candidate
 	for (int j =0; j < subset.size(); j++)
@@ -126,13 +123,33 @@ bool BasicInducer<Graph>::IsIsomorphic(const Graph& g, const Graph& subgraph){
 }
 
 template <typename Graph>
+vector<int> BasicInducer<Graph>::GetNeighborhood(const Graph& g, int i){
+	typename boost::graph_traits < Graph >::adjacency_iterator vi, vi_end;
+	// get neighborhood
+	vector<int> neighbors;
+
+	boost::tie(vi, vi_end) = boost::adjacent_vertices(i, g);
+	for (; vi != vi_end; vi++) {
+		neighbors.push_back(*vi);
+	}
+	return neighbors;
+}
+
+#endif /* UTILS_INDUCERS_BASIC_INDUCER_HPP_ */
+
+//private:
+//	vector< vector<int> > SubsetsOfSize(int n,  int k);
+// protected:
+//vector< vector<int> > SubsetsOfSize(vector<int> set,  int k);
+/*
+template <typename Graph>
 vector< vector<int> > BasicInducer<Graph>::SubsetsOfSize(int n,  int k)
 {
 	vector<int> set;
 	for ( int i = 0; i < n; i++ )
 		  set.push_back(i);
 
-	return SubsetsOfSize(set, k);
+	return CommonUtils::SubsetsOfSize(set, k);
 }
 
 template <typename Graph>
@@ -161,19 +178,4 @@ vector< vector<int> > BasicInducer<Graph>::SubsetsOfSize(vector<int> set,  int k
 	}
 
 	return subset_filtered;
-}
-
-template <typename Graph>
-vector<int> BasicInducer<Graph>::GetNeighborhood(const Graph& g, int i){
-	typename boost::graph_traits < Graph >::adjacency_iterator vi, vi_end;
-	// get neighborhood
-	vector<int> neighbors;
-
-	boost::tie(vi, vi_end) = boost::adjacent_vertices(i, g);
-	for (; vi != vi_end; vi++) {
-		neighbors.push_back(*vi); //get(g, *vi)
-	}
-	return neighbors;
-}
-
-#endif /* UTILS_INDUCERS_BASIC_INDUCER_HPP_ */
+}*/

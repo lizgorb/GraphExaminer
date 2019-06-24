@@ -1,4 +1,3 @@
-//#include "test_common.hpp"
 #include <boost/test/unit_test.hpp>
 #include "../../src/defs.hpp"
 #include "../../src/induced/induced_check.hpp"

@@ -1,18 +1,27 @@
 /*
- * diamond_inducer.cpp
+ * diamond_inducer.h
  *
  *  Created on: Mar 2, 2018
  *      Author: liz
  */
 
-#include "../inducer/diamond_inducer.h"
+#ifndef UTILS_INDUCERS_DIAMOND_INDUCER_H_
+#define UTILS_INDUCERS_DIAMOND_INDUCER_H_
 
+#include "../inducer/basic_inducer.hpp"
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 #include <iostream>
 
 using namespace boost;
-using namespace std;
+
+template <typename Graph>
+class DiamondInducer : public BasicInducer<Graph>  {
+public:
+	bool IsInduced(const Graph& g, const Graph& subgraph);
+private:
+	bool IsCentralVertex(const Graph& g, int i);
+};
 
 template <typename Graph>
 bool DiamondInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
@@ -113,3 +122,5 @@ bool DiamondInducer<Graph>::IsCentralVertex(const Graph& g, int i){
 
 	return central;
 }
+
+#endif /* UTILS_INDUCERS_DIAMOND_INDUCER_H_ */

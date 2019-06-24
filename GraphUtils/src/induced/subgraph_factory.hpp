@@ -57,7 +57,7 @@ Subgraph<Graph> SubgraphFactory<Graph>::Create(string name){
 	{
 		int n = stoi(name.substr(1), &sz);
 		g = CompleteFamily<Graph>::Create(n);
-		inducer = new CliqueInducer<Graph>(n);
+		inducer = new CliqueInducer<Graph>;
 	}
 	else if(regex_match (name, reg_wheel))
 	{

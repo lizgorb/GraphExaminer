@@ -10,12 +10,16 @@
 
 #include <iostream>
 #include <algorithm>
+#include <vector>
 #include <boost/graph/bron_kerbosch_all_cliques.hpp>
 #include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include "../inducer/basic_inducer.hpp"
 
 using namespace boost;
+using namespace std;
 
 class TriangleVisitor : public boost::default_dfs_visitor {
 public:
@@ -51,12 +55,9 @@ private:
     vector<vector<int>>& triangles_;
 };
 
-
-
 class InducedCliqueVisitor
 {
 private:
-
 	 vector<int>& clique_sizes_;
 
 public:
@@ -68,26 +69,71 @@ public:
     void clique(const Clique& c, const Graph& g)
     {
     	int size=0;
-        // Iterate over the clique and print each vertex within it.
+        // Iterate over the clique and count the vertices
         typename Clique::const_iterator i, end = c.end();
         for(i = c.begin(); i != end; ++i) {
-           // std::cout << *i << " ";
             size++;
         }
-       // std::cout << endl;
         clique_sizes_.push_back(size);
-
     }
 };
 
 template <typename Graph>
 class CliqueInducer : public BasicInducer<Graph>  {
 public:
-	CliqueInducer(int n);
 	bool IsInduced(const Graph& g, const Graph& subgraph);
 private:
 	int clique_size;
 	bool IsInducedK4(const Graph& g);
 };
+
+template <typename Graph>
+bool CliqueInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph){
+	int subgraph_v = boost::num_vertices(subgraph);
+	bool induced = false;
+
+	if (subgraph_v == 4){
+		return IsInducedK4(g);
+	}
+
+	vector<int> clique_sizes;
+
+	// Instantiate the visitor for printing cliques
+	InducedCliqueVisitor vis(clique_sizes);
+	// Use the Bron-Kerbosch algorithm to find all cliques
+	bron_kerbosch_all_cliques(g, vis);
+
+	int max_clique = vis.max_clique_size();
+	if (max_clique >= subgraph_v){
+		induced = true;
+	}
+
+	return induced;
+}
+
+// todo: this is similar to diamond inducer - combine the two somehow
+template <typename Graph>
+bool CliqueInducer<Graph>::IsInducedK4(const Graph& g){
+	bool induced  = false;
+	int i = num_vertices(g) - 1;
+
+	// induce the neighborhood of the last vertex
+	vector<int> neighbors = this->GetNeighborhood(g, i);
+
+	// is there is a triangle in the neighborhood we have a k4
+	if (neighbors.size() >= 3){
+		Graph ngbGraph = this->InduceSubset(g, neighbors);
+
+		vector<vector<int>> triangles;
+		vector<int> parents(neighbors.size(), -1);
+
+		TriangleVisitor vis(triangles, parents);
+		depth_first_search(ngbGraph, visitor(vis));
+
+		induced = vis.HasTriangles();
+	}
+
+	return induced;
+}
 
 #endif /* UTILS_INDUCERS_CLIQUE_INDUCER_H_ */

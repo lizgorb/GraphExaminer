@@ -12,8 +12,6 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-using namespace boost;
-
 //todo: Extend to dominating clique
 
 template <typename Graph>
@@ -31,7 +29,7 @@ DominatingVertexInducer<Graph>::DominatingVertexInducer(int n) {
 }
 
 template <typename Graph>
-bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph)
+bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subgraph, bool include_last)
 {
 	typedef typename graph_traits<Graph>::vertex_iterator vertex_iter;
 	typedef typename boost::graph_traits<Graph>::adjacency_iterator adjacency_iterator;
@@ -45,6 +43,7 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 			return this->IsIsomorphic(g, subgraph);
 		}
 
+	// find all vertices with degrees > max_degree
 	std::pair<vertex_iter, vertex_iter> vp;
 	for (vp = vertices(g); vp.first != vp.second; ++vp.first)
 	{
@@ -52,7 +51,7 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 			large_vertices.push_back(*vp.first);
 	}
 
-	// for every large vertex
+	// for every large vertex - get all the neighbours and create all subsets with correct size
 	vector<int> large_vertex_neighbors;
 	std::pair<adjacency_iterator,adjacency_iterator> n;
 
@@ -68,9 +67,10 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 
 		int last_id = g_v - 1;
 
-		// make sure the last vertex is either the largest or in the neighborhood
-		if (large_vertices[i] == last_id || find (large_vertex_neighbors.begin(), large_vertex_neighbors.end(), last_id) != large_vertex_neighbors.end())
+		// if include last then make sure the last vertex is either the largest or in the neighborhood
+		if (!include_last || (large_vertices[i] == last_id || find (large_vertex_neighbors.begin(), large_vertex_neighbors.end(), last_id) != large_vertex_neighbors.end()))
 		{
+			// test if the current induced subset is isomorphic to the subgraph
 			vector< vector<int> > subsets = this->SubsetsOfSize(large_vertex_neighbors,subgraph_v);
 
 			for (int i = 0; i < subsets.size() && !induced; i++)
@@ -80,11 +80,6 @@ bool DominatingVertexInducer<Graph>::IsInduced(const Graph& g, const Graph& subg
 			}
 		}
 	}
-
-
-	// find all vertices with degrees > max_degree
-	// get all their neighbours and create all subsets with correct size
-	// test if they are isomorphic
 
 	return induced;
 }
